@@ -14,8 +14,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
+});
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/notes.html"));
+});
+
+
+
+
 
 app.listen(PORT, function() {
     console.log("App listening on PORT " + PORT);
