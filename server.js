@@ -86,8 +86,6 @@ app.delete("/api/notes/:id", (req, res) => {
     });
   });
 
-
-
 app.use('*', (_, res) => {
 	res.redirect('/');
 });
