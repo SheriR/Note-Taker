@@ -6,16 +6,19 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 const shortid = require("shortid");
 
+let newNoteArray = require('./db/db.json');
+
+
+
 // Sets up the Express App
 // =============================================================
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-let data = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
 
 // Sets up the Express app to handle data parsing
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+//app.use(express.urlencoded({ extended: true }));
+//app.use(express.json());
 
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -24,50 +27,66 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 app.use(express.static('public'))
 
-app.get('/', (req, res) => {
+
+app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
-app.get('/notes', (req, res) => {
+app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/notes.html"));
+    
 });
 
-app.get("/api/notes", function (req, res) {
-    return res.json(data);
+app.get("/api/notes", (req, res) => {
+    res.sendFile(path.join(__dirname, "/db/db.json"));
   });
   
-  app.post("/api/notes", function (req, res) {
-    const newNote = req.body;
   
-    data.push(newNote);
   
-    fs.writeFile("./json/db.json", JSON.stringify(data), function (err) {
-      if (err) throw err;
-      console.log("test");
+app.post("/api/notes", (req, res) => {
+    //const newNote = req.body;
+
+    let noteId = shortid.generate();
+
+    let newNote = {
+        id: noteId,
+        title: req.body.title,
+        text: req.body.text
+    };
+          
+    fs.readFile("./db/db.json", "utf8", (err, data) => {
+        if (err) throw err;
   
+        const allNotes = JSON.parse(data);
+  
+        allNotes.push(newNote);
+  
+        fs.writeFile("./db/db.json", JSON.stringify(allNotes, null, 2), err => {
+          if (err) throw err;
+          res.end();
+          console.log("Note created!")
+        });
+      });
     });
+ 
+
+//app.delete("/api/notes/:id", (req, res) => {
+    let noteId = req.params.id;
+
+//    newNoteArray = newNoteArray.filter(function (note) {
+//         if (note.id === id) {
+//           delete newNoteArray;
+//         }
+//     });
+
+//     fs.writeFile("./db/db.json", JSON.stringify(newNoteArray), function (err) {
+//       if (err) throw err;
+//       console.log("Write Success!")
+//     });
   
-    return res.json(true);
+//     res.end();
   
-  });
-  
-  app.delete("/api/notes/:id", function (req, res) {
-    let id = req.params.id;
-    data = data.filter(function (note) {
-      if (note.id === id) {
-        return false;
-      }
-      return true;
-    });
-  
-    fs.writeFile("./json/db.json", JSON.stringify(data), function (err) {
-      if (err) throw err;
-      res.end();
-    });
-  
-    return res.json(data);
-  
-  });  
+//   });  
 
 app.use('*', (_, res) => {
 	res.redirect('/');
