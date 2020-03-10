@@ -44,8 +44,7 @@ app.get("/api/notes", (req, res) => {
   
   
 app.post("/api/notes", (req, res) => {
-    //const newNote = req.body;
-
+    
     let noteId = shortid.generate();
 
     let newNote = {
@@ -70,23 +69,24 @@ app.post("/api/notes", (req, res) => {
     });
  
 
-//app.delete("/api/notes/:id", (req, res) => {
+app.delete("/api/notes/:id", (req, res) => {
     let noteId = req.params.id;
 
-//    newNoteArray = newNoteArray.filter(function (note) {
-//         if (note.id === id) {
-//           delete newNoteArray;
-//         }
-//     });
+    fs.readFile("./db/db.json", "utf8", (err, data) => {
+        if (err) throw err;
+        
+    const allNotes = JSON.parse(data);
+    const newAllNotes = allNotes.filter(note => note.id != noteId);
 
-//     fs.writeFile("./db/db.json", JSON.stringify(newNoteArray), function (err) {
-//       if (err) throw err;
-//       console.log("Write Success!")
-//     });
-  
-//     res.end();
-  
-//   });  
+    fs.writeFile("./db/db.json", JSON.stringify(newAllNotes, null, 2), err => {
+        if (err) throw err;
+        res.end();
+        console.log("Note deleted!")
+      });
+    });
+  });
+
+
 
 app.use('*', (_, res) => {
 	res.redirect('/');
